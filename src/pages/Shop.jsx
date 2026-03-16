@@ -136,6 +136,11 @@ export default function Shop() {
   const [sort, setSort] = useState(sortParam)
   const [showSale, setShowSale] = useState(saleParam)
   const [search, setSearch] = useState(searchParam)
+
+  // Sync state when URL params change (e.g. clicking a category from the header)
+  useEffect(() => { setActiveCategory(categoryParam) }, [categoryParam])
+  useEffect(() => { setSearch(searchParam) }, [searchParam])
+  useEffect(() => { setShowSale(saleParam) }, [saleParam])
   const [view, setView] = useState('grid')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
