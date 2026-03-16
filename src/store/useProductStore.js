@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 
 export const useProductStore = create((set) => ({
   products: [],
-  loading: false,
+  loading: true,
   error: null,
 
   fetchProducts: async () => {

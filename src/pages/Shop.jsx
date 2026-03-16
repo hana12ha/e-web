@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { SlidersHorizontal, Grid2X2, LayoutList, X, ChevronDown, Search } from 'lucide-react'
@@ -24,6 +24,7 @@ const priceRanges = [
 ]
 
 function FilterSidebar({ activeCategory, setActiveCategory, activePrice, setActivePrice, showSale, setShowSale, onClose }) {
+  const { products } = useProductStore()
   return (
     <div className="space-y-8">
       {onClose && (
@@ -118,7 +119,12 @@ function FilterSidebar({ activeCategory, setActiveCategory, activePrice, setActi
 }
 
 export default function Shop() {
-  const { products, loading } = useProductStore()
+  const { products, loading, error, fetchProducts } = useProductStore()
+
+  useEffect(() => {
+    if (products.length === 0) fetchProducts()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const [searchParams, setSearchParams] = useSearchParams()
   const categoryParam = searchParams.get('category') || 'all'
   const searchParam = searchParams.get('search') || ''
@@ -309,6 +315,13 @@ export default function Shop() {
             {loading ? (
               <div className="flex items-center justify-center py-32">
                 <span className="w-10 h-10 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="text-5xl mb-4">⚠️</div>
+                <h3 className="font-display text-xl font-bold text-dark-800 dark:text-dark-100 mb-2">Failed to load products</h3>
+                <p className="text-dark-400 text-sm mb-6 max-w-sm">{error}</p>
+                <button onClick={fetchProducts} className="btn-primary">Retry</button>
               </div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-center">
