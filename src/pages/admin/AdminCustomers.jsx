@@ -1,44 +1,26 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Search, Users, Trash2, AlertCircle, X } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
+import { getCustomers } from '../../api/auth'
 import toast from 'react-hot-toast'
 
 export default function AdminCustomers() {
-  const [customers, setCustomers] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [customers, setCustomers] = useState(() => getCustomers())
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState(null)
   const [viewCustomer, setViewCustomer] = useState(null)
 
-  useEffect(() => {
-    fetchCustomers()
-  }, [])
-
-  const fetchCustomers = async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, name, avatar, created_at')
-      .order('created_at', { ascending: false })
-    if (!error) setCustomers(data || [])
-    setLoading(false)
-  }
-
   const filtered = customers.filter((c) =>
-    c.name?.toLowerCase().includes(search.toLowerCase())
+    c.name?.toLowerCase().includes(search.toLowerCase()) ||
+    c.email?.toLowerCase().includes(search.toLowerCase())
   )
 
-  const handleDelete = async (id) => {
-    // Deleting from auth.users cascades to profiles (via FK)
-    const { error } = await supabase.auth.admin.deleteUser(id).catch(() => ({ error: true }))
-    // If admin API not available with anon key, just remove from profiles table
-    const { error: profileError } = await supabase.from('profiles').delete().eq('id', id)
-    if (!profileError) {
-      setCustomers((prev) => prev.filter((c) => c.id !== id))
-      toast.success('Customer removed.')
-    } else {
-      toast.error('Could not delete customer.')
-    }
+  const handleDelete = (id) => {
+    // Remove from localStorage
+    const raw = localStorage.getItem('store-users')
+    const users = raw ? JSON.parse(raw) : []
+    localStorage.setItem('store-users', JSON.stringify(users.filter((u) => u.id !== id)))
+    setCustomers((prev) => prev.filter((c) => c.id !== id))
+    toast.success('Customer removed.')
     setDeleteId(null)
     if (viewCustomer?.id === id) setViewCustomer(null)
   }
@@ -61,7 +43,7 @@ export default function AdminCustomers() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder="Search by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
@@ -71,11 +53,7 @@ export default function AdminCustomers() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="py-20 flex items-center justify-center">
-            <span className="w-8 h-8 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-          </div>
-        ) : customers.length === 0 ? (
+        {customers.length === 0 ? (
           <div className="py-20 text-center text-slate-400">
             <Users size={40} className="mx-auto mb-3 text-slate-300" />
             <p className="font-medium">No customers yet.</p>
@@ -87,7 +65,7 @@ export default function AdminCustomers() {
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
                   <th className="text-left px-6 py-3.5 font-semibold text-slate-600">Customer</th>
-                  <th className="text-left px-4 py-3.5 font-semibold text-slate-600">User ID</th>
+                  <th className="text-left px-4 py-3.5 font-semibold text-slate-600">Email</th>
                   <th className="text-left px-4 py-3.5 font-semibold text-slate-600">Joined</th>
                   <th className="text-center px-6 py-3.5 font-semibold text-slate-600">Actions</th>
                 </tr>
@@ -112,10 +90,8 @@ export default function AdminCustomers() {
                           <span className="font-medium text-slate-900">{customer.name || '—'}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-4">
-                        <span className="font-mono text-xs text-slate-400">{customer.id.slice(0, 8)}…</span>
-                      </td>
-                      <td className="px-4 py-4 text-slate-500 text-xs">{formatDate(customer.created_at)}</td>
+                      <td className="px-4 py-4 text-slate-500 text-xs">{customer.email}</td>
+                      <td className="px-4 py-4 text-slate-500 text-xs">{formatDate(customer.joinedAt)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
@@ -161,13 +137,13 @@ export default function AdminCustomers() {
               )}
               <div>
                 <p className="font-bold text-slate-900 text-lg">{viewCustomer.name || '—'}</p>
-                <p className="text-slate-400 text-xs font-mono">{viewCustomer.id.slice(0, 16)}…</p>
+                <p className="text-slate-400 text-sm">{viewCustomer.email}</p>
               </div>
             </div>
             <div className="bg-slate-50 rounded-xl p-4 space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-500">Joined</span>
-                <span className="text-slate-700">{formatDate(viewCustomer.created_at)}</span>
+                <span className="text-slate-700">{formatDate(viewCustomer.joinedAt)}</span>
               </div>
             </div>
             <button

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { config } from '../config'
 
 export const useAdminStore = create(
   persist(
@@ -7,7 +8,7 @@ export const useAdminStore = create(
       isAuthenticated: false,
       admin: null,
       login: (email, password) => {
-        if (email === 'admin@luxe.com' && password === 'admin123') {
+        if (email === config.adminEmail && password === config.adminPassword) {
           set({ isAuthenticated: true, admin: { name: 'Admin', email } })
           return { success: true }
         }

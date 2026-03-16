@@ -47,8 +47,8 @@ export default function Account() {
     )
   }
 
-  const handleLogout = async () => {
-    await logout()
+  const handleLogout = () => {
+    logout()
     toast('See you soon!', { icon: '👋' })
     navigate('/')
   }

@@ -28,13 +28,13 @@ export default function AdminOrders() {
     return matchStatus && matchSearch
   })
 
-  const handleStatusChange = async (id, status) => {
-    await updateStatus(id, status)
+  const handleStatusChange = (id, status) => {
+    updateStatus(id, status)
     toast.success(`Order ${id} marked as ${status}.`)
   }
 
-  const handleDelete = async (id) => {
-    await deleteOrder(id)
+  const handleDelete = (id) => {
+    deleteOrder(id)
     toast.success('Order removed.')
     setDeleteId(null)
   }

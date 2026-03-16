@@ -37,13 +37,13 @@ export default function Login() {
   const { login, register } = useAuthStore()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setLoading(true)
 
     const result = mode === 'login'
-      ? await login(email, password)
-      : await register(name, email, password)
+      ? login(email, password)
+      : register(name, email, password)
 
     setLoading(false)
     if (result.success) {

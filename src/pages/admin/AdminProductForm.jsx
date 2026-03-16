@@ -65,14 +65,13 @@ export default function AdminProductForm() {
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }))
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.name.trim()) return toast.error('Name is required.')
     if (!form.price || isNaN(Number(form.price))) return toast.error('Valid price is required.')
     if (!form.stock || isNaN(Number(form.stock))) return toast.error('Valid stock is required.')
 
     setSaving(true)
-    await new Promise((r) => setTimeout(r, 300))
 
     const data = {
       name: form.name.trim(),
@@ -94,10 +93,10 @@ export default function AdminProductForm() {
     }
 
     if (isEditing) {
-      await updateProduct(parseInt(id), data)
+      updateProduct(parseInt(id), data)
       toast.success('Product updated!')
     } else {
-      await addProduct(data)
+      addProduct(data)
       toast.success('Product added!')
     }
 

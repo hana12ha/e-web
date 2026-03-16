@@ -1,50 +1,34 @@
 import { create } from 'zustand'
-import { supabase } from '../lib/supabase'
+import { persist } from 'zustand/middleware'
+import { MOCK_ORDERS } from '../api/orders'
 
-export const useOrderStore = create((set) => ({
-  orders: [],
-  loading: false,
+// ============================================================
+//  ORDER STORE
+//  Uses mock orders from src/api/orders.js as initial data.
+//  Changes are persisted to localStorage.
+//
+//  To connect a real backend, replace updateStatus / deleteOrder
+//  with async API calls and remove the persist middleware if
+//  orders are fetched fresh on each load.
+// ============================================================
 
-  fetchOrders: async () => {
-    set({ loading: true })
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (!error) {
-      set({ orders: (data || []).map(fromDb), loading: false })
-    } else {
-      set({ loading: false })
-    }
-  },
+export const useOrderStore = create(
+  persist(
+    (set) => ({
+      orders: MOCK_ORDERS,
 
-  updateStatus: async (id, status) => {
-    const { error } = await supabase.from('orders').update({ status }).eq('id', id)
-    if (!error) {
-      set((s) => ({
-        orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)),
-      }))
-    }
-  },
+      updateStatus: (id, status) => {
+        set((s) => ({
+          orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)),
+        }))
+      },
 
-  deleteOrder: async (id) => {
-    const { error } = await supabase.from('orders').delete().eq('id', id)
-    if (!error) {
-      set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }))
-    }
-  },
-}))
+      deleteOrder: (id) => {
+        set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }))
+      },
 
-// ── Mapper ────────────────────────────────────────────────────
-
-function fromDb(o) {
-  return {
-    id: o.id,
-    customer: { name: o.customer_name, email: o.customer_email },
-    items: o.items || [],
-    total: Number(o.total),
-    status: o.status,
-    date: o.date,
-    address: o.address,
-  }
-}
+      resetOrders: () => set({ orders: MOCK_ORDERS }),
+    }),
+    { name: 'luxe-orders' }
+  )
+)

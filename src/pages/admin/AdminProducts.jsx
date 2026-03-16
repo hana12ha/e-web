@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Pencil, Trash2, AlertCircle } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, AlertCircle, Package } from 'lucide-react'
 import { useProductStore } from '../../store/useProductStore'
 import toast from 'react-hot-toast'
 
@@ -26,8 +26,8 @@ export default function AdminProducts() {
     return matchCat && matchSearch
   })
 
-  const confirmDelete = async (id) => {
-    await deleteProduct(id)
+  const confirmDelete = (id) => {
+    deleteProduct(id)
     toast.success('Product deleted.')
     setDeleteId(null)
   }

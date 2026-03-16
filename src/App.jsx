@@ -2,9 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { useEffect } from 'react'
 import { useThemeStore } from './store/useThemeStore'
-import { useAuthStore } from './store/useAuthStore'
-import { useProductStore } from './store/useProductStore'
-import { useOrderStore } from './store/useOrderStore'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import CartDrawer from './components/layout/CartDrawer'
@@ -45,15 +42,9 @@ function NoLayout({ children }) {
 
 export default function App() {
   const { init } = useThemeStore()
-  const { init: initAuth } = useAuthStore()
-  const { fetchProducts } = useProductStore()
-  const { fetchOrders } = useOrderStore()
 
   useEffect(() => {
     init()
-    initAuth()
-    fetchProducts()
-    fetchOrders()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

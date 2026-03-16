@@ -32,7 +32,7 @@ export default function Header() {
   const cartCount = useCartStore((s) => s.items.reduce((n, i) => n + i.qty, 0))
   const { openCart } = useCartStore()
   const wishlistCount = useWishlistStore((s) => s.items.length)
-  const { isAuthenticated, user, loading: authLoading } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const { products } = useProductStore()
   const { dark, toggle: toggleTheme } = useThemeStore()
 
@@ -204,7 +204,7 @@ export default function Header() {
 
               {/* Auth */}
               <Link
-                to={!authLoading && isAuthenticated ? '/account' : '/login'}
+                to={isAuthenticated ? '/account' : '/login'}
                 className={`w-10 h-10 hidden sm:flex items-center justify-center rounded-xl transition-all duration-200 ${
                   transparent
                     ? 'text-white/90 hover:bg-white/10'
@@ -333,7 +333,7 @@ export default function Header() {
                 ))}
                 <div className="border-t border-gray-200 dark:border-dark-700 my-2 pt-2 flex gap-2">
                   <Link to="/wishlist" className="flex-1 btn-ghost text-sm justify-center"><Heart size={16} /> Wishlist ({wishlistCount})</Link>
-                  <Link to={!authLoading && isAuthenticated ? '/account' : '/login'} className="flex-1 btn-ghost text-sm justify-center"><User size={16} />{isAuthenticated ? 'Account' : 'Login'}</Link>
+                  <Link to={isAuthenticated ? '/account' : '/login'} className="flex-1 btn-ghost text-sm justify-center"><User size={16} />{isAuthenticated ? 'Account' : 'Login'}</Link>
                   <button onClick={toggleTheme} className="btn-ghost text-sm"><Sun size={16} /></button>
                 </div>
               </nav>

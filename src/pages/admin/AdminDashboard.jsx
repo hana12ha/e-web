@@ -1,9 +1,9 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Package, ShoppingCart, Users, TrendingUp, AlertTriangle, Star, ArrowRight } from 'lucide-react'
 import { useProductStore } from '../../store/useProductStore'
 import { useOrderStore } from '../../store/useOrderStore'
-import { supabase } from '../../lib/supabase'
+import { getCustomers } from '../../api/auth'
 
 const STATUS_COLORS = {
   Delivered: 'bg-green-100 text-green-700',
@@ -31,14 +31,7 @@ function StatCard({ icon: Icon, label, value, sub, color }) {
 export default function AdminDashboard() {
   const { products } = useProductStore()
   const { orders } = useOrderStore()
-  const [customerCount, setCustomerCount] = useState(0)
-
-  useEffect(() => {
-    supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .then(({ count }) => setCustomerCount(count || 0))
-  }, [])
+  const customerCount = getCustomers().length
 
   const stats = useMemo(() => {
     const totalRevenue = products.reduce((sum, p) => sum + p.price * (p.sold || 0), 0)
