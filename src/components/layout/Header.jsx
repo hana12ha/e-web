@@ -72,6 +72,23 @@ export default function Header() {
     }
   }
 
+  const isLinkActive = (link) => {
+    const [linkPath, linkQuery] = link.path.split('?')
+    if (location.pathname !== linkPath) return false
+    if (!linkQuery) {
+      // "Shop" — active only when no special query params are set
+      const p = new URLSearchParams(location.search)
+      return !p.get('sort') && p.get('sale') !== 'true'
+    }
+    // "Collections" / "Sale" — check that their specific param is present
+    const linkParams = new URLSearchParams(linkQuery)
+    const currentParams = new URLSearchParams(location.search)
+    for (const [key, val] of linkParams) {
+      if (currentParams.get(key) !== val) return false
+    }
+    return true
+  }
+
   const isHome = location.pathname === '/'
   const transparent = isHome && !scrolled && !mobileOpen && !searchOpen
 
@@ -110,7 +127,7 @@ export default function Header() {
                     className={`flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                       transparent
                         ? 'text-white/90 hover:text-white hover:bg-white/10'
-                        : location.pathname === link.path
+                        : isLinkActive(link)
                         ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-950'
                         : 'text-dark-600 dark:text-dark-300 hover:text-dark-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800'
                     }`}
