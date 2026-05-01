@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ChevronRight, CreditCard, Check, ShieldCheck, Lock } from 'lucide-react'
 import { useCartStore } from '../store/useCartStore'
 import toast from 'react-hot-toast'
+import { supabase } from '../lib/supabase'
 
 const steps = ['Cart', 'Shipping', 'Payment', 'Review']
 
@@ -131,7 +132,24 @@ export default function Checkout() {
   const tax = subtotal * 0.08
   const total = subtotal + shipping_cost + tax
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
+    const address = [shipping.address, shipping.apt, shipping.city, shipping.state, shipping.zip, shipping.country]
+      .filter(Boolean).join(', ')
+
+    const { error } = await supabase.from('orders').insert([{
+      customer_name: `${shipping.firstName || ''} ${shipping.lastName || ''}`.trim(),
+      customer_email: shipping.email || '',
+      items: items.map((i) => ({ name: i.name, qty: i.qty, price: i.price })),
+      total,
+      status: 'Processing',
+      address,
+    }])
+
+    if (error) {
+      toast.error('Failed to place order. Please try again.')
+      return
+    }
+
     setOrderPlaced(true)
     clearCart()
     setTimeout(() => navigate('/'), 5000)

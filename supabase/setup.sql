@@ -74,7 +74,10 @@ CREATE POLICY "products_admin_write" ON products FOR ALL
     auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin'));   
 
 -- Orders: open for demo (in production, restrict to admin role)
-CREATE POLICY "orders_all" ON orders FOR ALL USING (true);
+CREATE POLICY "orders_insert" ON orders FOR INSERT WITH CHECK (true);
+CREATE POLICY "orders_select" ON orders FOR SELECT USING (true);
+CREATE POLICY "orders_update" ON orders FOR UPDATE USING (true);
+CREATE POLICY "orders_delete" ON orders FOR DELETE USING (true);
 
 
 -- ─────────────────────────────────────────
