@@ -15,14 +15,19 @@ export default function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 400))
-    const result = login(email, password)
-    setLoading(false)
-    if (result.success) {
-      toast.success('Welcome back, Admin!')
-      navigate('/admin/dashboard')
-    } else {
-      toast.error(result.message)
+    try {
+      const result = await login(email, password)
+      setLoading(true)
+      if (result.success) {
+        toast.success('Welcome back, Admin!')
+        navigate('/admin/dashboard')
+      } else {
+        toast.error(result.message)
+      } 
+    } catch (error) {
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -112,12 +117,6 @@ export default function AdminLogin() {
               )}
             </button>
           </form>
-
-          <div className="mt-8 p-4 bg-purple-50 rounded-xl border border-purple-100">
-            <p className="text-sm text-purple-700 font-medium mb-1">Demo credentials</p>
-            <p className="text-xs text-purple-600">Email: admin@luxe.com</p>
-            <p className="text-xs text-purple-600">Password: admin123</p>
-          </div>
 
           <a href="/" className="block text-center mt-6 text-sm text-slate-400 hover:text-slate-600 transition-colors">
             ← Back to storefront

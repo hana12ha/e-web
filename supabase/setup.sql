@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   id         UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   name       TEXT,
   avatar     TEXT,
+  role       TEXT NOT NULL DEFAULT 'customer',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -67,7 +68,10 @@ CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Products: public read, open write (admin panel uses anon key for now)
 CREATE POLICY "products_select" ON products FOR SELECT USING (true);
-CREATE POLICY "products_all"    ON products FOR ALL    USING (true);
+DROP POLICY "products_all" ON products;                                              
+CREATE POLICY "products_admin_write" ON products FOR ALL 
+  USING (                                                                            
+    auth.uid() IN (SELECT id FROM profiles WHERE role = 'admin'));   
 
 -- Orders: open for demo (in production, restrict to admin role)
 CREATE POLICY "orders_all" ON orders FOR ALL USING (true);
@@ -80,11 +84,12 @@ CREATE POLICY "orders_all" ON orders FOR ALL USING (true);
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, name, avatar)
+  INSERT INTO public.profiles (id, name, avatar, role)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'name',
-    NEW.raw_user_meta_data->>'avatar'
+    NEW.raw_user_meta_data->>'avatar',
+    'customer' -- default for all signups
   );
   RETURN NEW;
 END;

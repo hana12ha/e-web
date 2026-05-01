@@ -22,6 +22,7 @@ import AdminProducts from './pages/admin/AdminProducts'
 import AdminProductForm from './pages/admin/AdminProductForm'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminCustomers from './pages/admin/AdminCustomers'
+import { useAdminStore } from './store/useAdminStore'
 
 function Layout({ children }) {
   return (
@@ -46,12 +47,14 @@ function NoLayout({ children }) {
 export default function App() {
   const { init } = useThemeStore()
   const { init: initAuth } = useAuthStore()
+  const { init: initAdmin } = useAdminStore()
   const { fetchProducts } = useProductStore()
   const { fetchOrders } = useOrderStore()
 
   useEffect(() => {
     init()
     initAuth()
+    initAdmin()
     fetchProducts()
     fetchOrders()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
